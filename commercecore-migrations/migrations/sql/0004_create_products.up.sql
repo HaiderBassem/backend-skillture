@@ -1,3 +1,4 @@
+-- FR-03  Product management
 
 CREATE TABLE products (
     id              BIGINT        GENERATED ALWAYS AS IDENTITY,

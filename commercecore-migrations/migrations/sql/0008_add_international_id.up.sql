@@ -1,0 +1,3 @@
+
+ALTER TABLE users
+    ADD COLUMN international_id BIGINT NOT NULL DEFAULT 0;

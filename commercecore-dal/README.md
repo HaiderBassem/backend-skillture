@@ -12,6 +12,7 @@ The database access layer (repository pattern) for CommerceCore.
 commercecore-dal/
 ├── .env                  your local settings (git-ignored)
 ├── .env.example          template for .env
+├── pytest.ini            lets the tests `import dal`
 ├── requirements.txt      runtime dependencies  (requirements-dev.txt adds pytest)
 ├── dal/
 │   ├── config.py         reads .env  ->  DATABASE_URL
@@ -26,33 +27,32 @@ commercecore-dal/
 
 ## Setup
 
-```bash
-cd commercecore-dal
-uv venv .venv && uv pip install -r requirements-dev.txt   # or: python -m venv .venv && pip install -r requirements-dev.txt
-cp .env.example .env                                       # then edit DATABASE_URL
-.venv/bin/python -m dal.check                              # connection + tables test
-```
-
-Create the database and run the migrations first (they are in `../commercecore-migrations`):
+All commands run from the **repository root** (one shared `.venv` for every layer, see the root `Makefile`):
 
 ```bash
-createdb commercecore
-cd ../commercecore-migrations
-uv pip install -r requirements.txt     # alembic + driver (into any venv)
-DATABASE_URL=postgresql+psycopg://USER@localhost:5432/commercecore alembic upgrade head
+createdb commercecore && createdb commercecore_test
+cp commercecore-dal/.env.example commercecore-dal/.env    # then edit DATABASE_URL and TEST_DATABASE_URL
+make install                                              # shared .venv with every dependency
+make migrate                                              # build both databases (../commercecore-migrations)
+make check                                                # = python -m dal.check: connection + tables
 ```
+
+This `.env` is the only place the database URLs are configured: the migrations, the services and the API all read it.
 
 ## Using it
 
 ```python
 from dal import UnitOfWork, NewOrderItem
 
-with UnitOfWork() as uow:                      # opens a transaction
-    product = uow.products.get_many_for_update([1])[0]      # locks the row
+with UnitOfWork() as uow:  # opens a transaction
+    product = uow.products.get_many_for_update([1])[0]  # locks the row
     uow.products.decrease_stock(product.id, 2)
-    uow.orders.create(user_id=7, items=[
-        NewOrderItem(product.id, product.name, product.price, 2),   # price from the DB, never the client
-    ])
+    uow.orders.create(
+        user_id=7,
+        items=[
+            NewOrderItem(product.id, product.name, product.price, 2),  # price from the DB, never the client
+        ],
+    )
 # leaving the block commits; an exception rolls EVERYTHING back (all or nothing)
 ```
 
@@ -63,7 +63,7 @@ with UnitOfWork() as uow:                      # opens a transaction
 | Layer | Responsibility |
 |---|---|
 | **This layer** | Talk to the database. Atomic stock updates, row locks, "only my orders" queries, translate DB errors. |
-| **Service layer (next)** | Business flow: validate the request, who may do what (roles), hash passwords, combine repositories into "place order" / "cancel order". |
+| **Service layer** (`../commercecore-services`) | Business flow: validate the request, who may do what (roles), hash passwords, combine repositories into "place order" / "cancel order". |
 
 The database itself already enforces the hard rules (price > 0, stock >= 0, immutable order history,
 only admins decide orders, order total = sum of items). Breaking one raises `RuleViolationError`.
@@ -71,8 +71,8 @@ only admins decide orders, order total = sum of items). Breaking one raises `Rul
 ## Tests
 
 ```bash
-createdb commercecore_test                        # then run the migrations against it
-.venv/bin/python -m pytest
+make test                                         # from the root: DAL, then services, then API
+cd commercecore-dal && ../.venv/bin/python -m pytest   # only this layer (30 tests)
 ```
 
 `TEST_DATABASE_URL` (in `.env`) must point at a database whose name contains `test`: every table is emptied before each test.

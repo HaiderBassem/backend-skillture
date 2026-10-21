@@ -1,0 +1,4 @@
+# Everything for all four projects, installed into ONE shared .venv by `make install`.
+-r commercecore-api/requirements-dev.txt       # api -> services -> dal (+ pytest, httpx2)
+-r commercecore-migrations/requirements.txt    # alembic
+ruff>=0.6                                      # make lint

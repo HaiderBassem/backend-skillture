@@ -1,0 +1,5 @@
+# The API sits on top of the service layer (which pulls in the data access layer).
+-r ../commercecore-services/requirements.txt
+fastapi>=0.115,<1.0
+uvicorn>=0.30
+PyJWT>=2.8,<3

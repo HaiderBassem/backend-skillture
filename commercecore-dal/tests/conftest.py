@@ -75,8 +75,6 @@ def make_product(new_uow, category):
 
     def _make(name, price, stock=10, active=True):
         with new_uow() as uow:
-            return uow.products.add(
-                category.id, name, Decimal(price), stock_quantity=stock, is_active=active
-            )
+            return uow.products.add(category.id, name, Decimal(price), stock_quantity=stock, is_active=active)
 
     return _make

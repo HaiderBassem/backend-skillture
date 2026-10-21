@@ -6,7 +6,6 @@ import pytest
 
 from dal import CategoryInUseError, DuplicateError, RuleViolationError, UserRole
 
-
 # ---------------------------------------------------------------- users
 
 

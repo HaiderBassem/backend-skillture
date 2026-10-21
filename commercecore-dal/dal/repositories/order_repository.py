@@ -1,17 +1,13 @@
 from collections import defaultdict
+from collections.abc import Sequence
 from dataclasses import replace
 from decimal import Decimal
-from typing import Sequence
 
 from ..entities import NewOrderItem, Order, OrderItem, OrderStatus
 from .base import BaseRepository
 
-_ORDER_COLUMNS = (
-    "id, user_id, status, total_amount, decided_by, decided_at, created_at, updated_at"
-)
-_ITEM_COLUMNS = (
-    "id, order_id, product_id, product_name, unit_price, quantity, line_total, created_at"
-)
+_ORDER_COLUMNS = "id, user_id, status, total_amount, decided_by, decided_at, created_at, updated_at"
+_ITEM_COLUMNS = "id, order_id, product_id, product_name, unit_price, quantity, line_total, created_at"
 
 
 class OrderRepository(BaseRepository):
@@ -38,14 +34,18 @@ class OrderRepository(BaseRepository):
             raise ValueError("an order needs at least one item (BR-07)")
 
         total = sum((i.unit_price * i.quantity for i in items), Decimal("0"))
-        order_row = self._execute(
-            f"""
+        order_row = (
+            self._execute(
+                f"""
             INSERT INTO orders (user_id, total_amount)
             VALUES (:user_id, :total_amount)
             RETURNING {_ORDER_COLUMNS}
             """,
-            {"user_id": user_id, "total_amount": total},
-        ).mappings().one()
+                {"user_id": user_id, "total_amount": total},
+            )
+            .mappings()
+            .one()
+        )
 
         self._execute(
             """
@@ -69,9 +69,11 @@ class OrderRepository(BaseRepository):
 
     def get_by_id(self, order_id: int) -> Order | None:
         """Any order, by id. For administrators."""
-        row = self._execute(
-            f"SELECT {_ORDER_COLUMNS} FROM orders WHERE id = :id", {"id": order_id}
-        ).mappings().first()
+        row = (
+            self._execute(f"SELECT {_ORDER_COLUMNS} FROM orders WHERE id = :id", {"id": order_id})
+            .mappings()
+            .first()
+        )
         return self._with_items([Order.from_row(row)])[0] if row else None
 
     def get_for_user(self, order_id: int, user_id: int) -> Order | None:
@@ -80,41 +82,51 @@ class OrderRepository(BaseRepository):
         Someone else's order and a missing order both return None, so nothing
         about another customer's order is revealed.
         """
-        row = self._execute(
-            f"SELECT {_ORDER_COLUMNS} FROM orders WHERE id = :id AND user_id = :user_id",
-            {"id": order_id, "user_id": user_id},
-        ).mappings().first()
+        row = (
+            self._execute(
+                f"SELECT {_ORDER_COLUMNS} FROM orders WHERE id = :id AND user_id = :user_id",
+                {"id": order_id, "user_id": user_id},
+            )
+            .mappings()
+            .first()
+        )
         return self._with_items([Order.from_row(row)])[0] if row else None
 
     def list_for_user(self, user_id: int, limit: int = 50, offset: int = 0) -> list[Order]:
         """A customer's own orders, newest first."""
-        rows = self._execute(
-            f"""
+        rows = (
+            self._execute(
+                f"""
             SELECT {_ORDER_COLUMNS} FROM orders
             WHERE user_id = :user_id
             ORDER BY created_at DESC, id DESC
             LIMIT :limit OFFSET :offset
             """,
-            {"user_id": user_id, "limit": limit, "offset": offset},
-        ).mappings().all()
+                {"user_id": user_id, "limit": limit, "offset": offset},
+            )
+            .mappings()
+            .all()
+        )
         return self._with_items([Order.from_row(r) for r in rows])
 
-    def list_all(
-        self, status: OrderStatus | None = None, limit: int = 50, offset: int = 0
-    ) -> list[Order]:
+    def list_all(self, status: OrderStatus | None = None, limit: int = 50, offset: int = 0) -> list[Order]:
         """Every customer's orders, newest first, optionally filtered by status. For administrators."""
         where = "WHERE status = :status" if status else ""
         params: dict = {"limit": limit, "offset": offset}
         if status:
             params["status"] = status.value
-        rows = self._execute(
-            f"""
+        rows = (
+            self._execute(
+                f"""
             SELECT {_ORDER_COLUMNS} FROM orders {where}
             ORDER BY created_at DESC, id DESC
             LIMIT :limit OFFSET :offset
             """,
-            params,
-        ).mappings().all()
+                params,
+            )
+            .mappings()
+            .all()
+        )
         return self._with_items([Order.from_row(r) for r in rows])
 
     # ------------------------------------------------------------------ decide
@@ -132,14 +144,18 @@ class OrderRepository(BaseRepository):
         if new_status == OrderStatus.PENDING:
             raise ValueError("an order can only be decided as confirmed or cancelled")
 
-        row = self._execute(
-            f"""
+        row = (
+            self._execute(
+                f"""
             UPDATE orders SET status = :status, decided_by = :admin_id
             WHERE id = :id AND status = 'pending'
             RETURNING {_ORDER_COLUMNS}
             """,
-            {"id": order_id, "status": new_status.value, "admin_id": admin_id},
-        ).mappings().first()
+                {"id": order_id, "status": new_status.value, "admin_id": admin_id},
+            )
+            .mappings()
+            .first()
+        )
         return self._with_items([Order.from_row(row)])[0] if row else None
 
     # ----------------------------------------------------------------- helpers
@@ -148,14 +164,18 @@ class OrderRepository(BaseRepository):
         """Load the items of all given orders with ONE query."""
         if not orders:
             return []
-        rows = self._execute(
-            f"""
+        rows = (
+            self._execute(
+                f"""
             SELECT {_ITEM_COLUMNS} FROM order_items
             WHERE order_id = ANY(:order_ids)
             ORDER BY id
             """,
-            {"order_ids": [o.id for o in orders]},
-        ).mappings().all()
+                {"order_ids": [o.id for o in orders]},
+            )
+            .mappings()
+            .all()
+        )
 
         items_by_order: dict[int, list[OrderItem]] = defaultdict(list)
         for row in rows:

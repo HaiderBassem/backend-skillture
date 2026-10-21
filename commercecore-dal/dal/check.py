@@ -28,7 +28,9 @@ def main() -> int:
     print(f"Connected: {version}")
     missing = sorted(EXPECTED_TABLES - tables)
     if missing:
-        print(f"Tables missing: {', '.join(missing)}  ->  run the migrations in commercecore-migrations first.")
+        print(
+            f"Tables missing: {', '.join(missing)}  ->  run the migrations in commercecore-migrations first."
+        )
         return 1
     print("All CommerceCore tables found. Ready.")
     return 0

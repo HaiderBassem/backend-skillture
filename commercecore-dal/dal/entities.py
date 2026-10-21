@@ -6,11 +6,11 @@ They are NOT SQLAlchemy models: they only carry data out of the database.
 
 from __future__ import annotations
 
+from collections.abc import Mapping
 from dataclasses import dataclass, fields
 from datetime import datetime
 from decimal import Decimal
 from enum import Enum
-from typing import Mapping
 
 
 class UserRole(str, Enum):
@@ -36,6 +36,7 @@ class User:
     id: int
     full_name: str
     email: str
+    international_id: int  # optional at sign-up: 0 means "not given" (migration 0008)
     password_hash: str
     role: UserRole
     created_at: datetime

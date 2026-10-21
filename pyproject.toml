@@ -1,0 +1,15 @@
+# Shared tool settings for all four projects (no package is built from this file).
+[tool.ruff]
+line-length = 110
+target-version = "py312"
+exclude = [".venv", "**/.venv"]
+
+[tool.ruff.lint]
+# Pinned on purpose, so `make lint` gives the same answer on every machine:
+# E/F = errors and unused or undefined names, I = import order, UP = modern Python syntax.
+select = ["E4", "E7", "E9", "F", "I", "UP"]
+# UP042 would turn `class UserRole(str, Enum)` into StrEnum, which changes what str(role) returns.
+ignore = ["UP042"]
+
+[tool.ruff.lint.isort]
+known-first-party = ["api", "dal", "migrations", "services"]

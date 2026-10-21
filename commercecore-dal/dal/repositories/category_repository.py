@@ -15,20 +15,26 @@ class CategoryRepository(BaseRepository):
 
     def add(self, name: str, description: str | None = None) -> Category:
         """Raises DuplicateError if the name exists (case-insensitive)."""
-        row = self._execute(
-            f"""
+        row = (
+            self._execute(
+                f"""
             INSERT INTO categories (name, description)
             VALUES (:name, :description)
             RETURNING {_COLUMNS}
             """,
-            {"name": name, "description": description},
-        ).mappings().one()
+                {"name": name, "description": description},
+            )
+            .mappings()
+            .one()
+        )
         return Category.from_row(row)
 
     def get_by_id(self, category_id: int) -> Category | None:
-        row = self._execute(
-            f"SELECT {_COLUMNS} FROM categories WHERE id = :id", {"id": category_id}
-        ).mappings().first()
+        row = (
+            self._execute(f"SELECT {_COLUMNS} FROM categories WHERE id = :id", {"id": category_id})
+            .mappings()
+            .first()
+        )
         return Category.from_row(row) if row else None
 
     def list_all(self) -> list[Category]:
@@ -37,14 +43,18 @@ class CategoryRepository(BaseRepository):
 
     def update(self, category_id: int, name: str, description: str | None) -> Category | None:
         """Replace name and description. Returns None if the category does not exist."""
-        row = self._execute(
-            f"""
+        row = (
+            self._execute(
+                f"""
             UPDATE categories SET name = :name, description = :description
             WHERE id = :id
             RETURNING {_COLUMNS}
             """,
-            {"id": category_id, "name": name, "description": description},
-        ).mappings().first()
+                {"id": category_id, "name": name, "description": description},
+            )
+            .mappings()
+            .first()
+        )
         return Category.from_row(row) if row else None
 
     def delete(self, category_id: int) -> bool:

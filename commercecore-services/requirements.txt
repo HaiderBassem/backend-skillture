@@ -1,0 +1,2 @@
+# The service layer sits on top of the data access layer and shares its dependencies.
+-r ../commercecore-dal/requirements.txt

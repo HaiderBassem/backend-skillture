@@ -1,13 +1,10 @@
+from collections.abc import Sequence
 from decimal import Decimal
-from typing import Sequence
 
 from ..entities import Product
 from .base import BaseRepository
 
-_COLUMNS = (
-    "id, category_id, name, description, price, stock_quantity, "
-    "is_active, created_at, updated_at"
-)
+_COLUMNS = "id, category_id, name, description, price, stock_quantity, is_active, created_at, updated_at"
 
 
 class ProductRepository(BaseRepository):
@@ -26,27 +23,33 @@ class ProductRepository(BaseRepository):
         stock_quantity: int = 0,
         is_active: bool = True,
     ) -> Product:
-        row = self._execute(
-            f"""
+        row = (
+            self._execute(
+                f"""
             INSERT INTO products (category_id, name, description, price, stock_quantity, is_active)
             VALUES (:category_id, :name, :description, :price, :stock_quantity, :is_active)
             RETURNING {_COLUMNS}
             """,
-            {
-                "category_id": category_id,
-                "name": name,
-                "description": description,
-                "price": price,
-                "stock_quantity": stock_quantity,
-                "is_active": is_active,
-            },
-        ).mappings().one()
+                {
+                    "category_id": category_id,
+                    "name": name,
+                    "description": description,
+                    "price": price,
+                    "stock_quantity": stock_quantity,
+                    "is_active": is_active,
+                },
+            )
+            .mappings()
+            .one()
+        )
         return Product.from_row(row)
 
     def get_by_id(self, product_id: int) -> Product | None:
-        row = self._execute(
-            f"SELECT {_COLUMNS} FROM products WHERE id = :id", {"id": product_id}
-        ).mappings().first()
+        row = (
+            self._execute(f"SELECT {_COLUMNS} FROM products WHERE id = :id", {"id": product_id})
+            .mappings()
+            .first()
+        )
         return Product.from_row(row) if row else None
 
     def list_products(
@@ -67,14 +70,18 @@ class ProductRepository(BaseRepository):
             params["category_id"] = category_id
         where = f"WHERE {' AND '.join(conditions)}" if conditions else ""
 
-        rows = self._execute(
-            f"""
+        rows = (
+            self._execute(
+                f"""
             SELECT {_COLUMNS} FROM products {where}
             ORDER BY name, id
             LIMIT :limit OFFSET :offset
             """,
-            params,
-        ).mappings().all()
+                params,
+            )
+            .mappings()
+            .all()
+        )
         return [Product.from_row(r) for r in rows]
 
     def get_many_for_update(self, product_ids: Sequence[int]) -> list[Product]:
@@ -85,15 +92,19 @@ class ProductRepository(BaseRepository):
         keeps two concurrent orders from deadlocking each other.
         Ids that do not exist are simply missing from the result.
         """
-        rows = self._execute(
-            f"""
+        rows = (
+            self._execute(
+                f"""
             SELECT {_COLUMNS} FROM products
             WHERE id = ANY(:ids)
             ORDER BY id
             FOR UPDATE
             """,
-            {"ids": list(product_ids)},
-        ).mappings().all()
+                {"ids": list(product_ids)},
+            )
+            .mappings()
+            .all()
+        )
         return [Product.from_row(r) for r in rows]
 
     def update_details(
@@ -145,8 +156,12 @@ class ProductRepository(BaseRepository):
         return result.rowcount == 1
 
     def _update_one(self, product_id: int, set_clause: str, params: dict) -> Product | None:
-        row = self._execute(
-            f"UPDATE products SET {set_clause} WHERE id = :id RETURNING {_COLUMNS}",
-            {"id": product_id, **params},
-        ).mappings().first()
+        row = (
+            self._execute(
+                f"UPDATE products SET {set_clause} WHERE id = :id RETURNING {_COLUMNS}",
+                {"id": product_id, **params},
+            )
+            .mappings()
+            .first()
+        )
         return Product.from_row(row) if row else None

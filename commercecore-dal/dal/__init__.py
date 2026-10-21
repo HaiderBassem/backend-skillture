@@ -1,9 +1,9 @@
 """CommerceCore data access layer.
 
-    from dal import UnitOfWork
+from dal import UnitOfWork
 
-    with UnitOfWork() as uow:
-        products = uow.products.list_products(category_id=1)
+with UnitOfWork() as uow:
+    products = uow.products.list_products(category_id=1)
 """
 
 from .entities import (

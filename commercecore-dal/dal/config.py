@@ -20,16 +20,14 @@ def normalize_url(url: str) -> str:
     """Make a plain postgresql:// URL use the psycopg (v3) driver we install."""
     for plain in ("postgresql://", "postgres://"):
         if url.startswith(plain):
-            return "postgresql+psycopg://" + url[len(plain):]
+            return "postgresql+psycopg://" + url[len(plain) :]
     return url
 
 
 def get_settings() -> Settings:
     url = os.getenv("DATABASE_URL")
     if not url:
-        raise RuntimeError(
-            "DATABASE_URL is not set. Copy .env.example to .env and fill it in."
-        )
+        raise RuntimeError("DATABASE_URL is not set. Copy .env.example to .env and fill it in.")
     return Settings(
         database_url=normalize_url(url),
         db_echo=os.getenv("DB_ECHO", "false").lower() in ("1", "true", "yes"),

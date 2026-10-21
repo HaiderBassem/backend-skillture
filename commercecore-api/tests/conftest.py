@@ -2,7 +2,7 @@
 
 The API tests send real HTTP requests (FastAPI's TestClient) through every
 layer down to a REAL Postgres database, like the DAL and service tests:
-TEST_DATABASE_URL (in ../commercecore-dal/.env) must point at a migrated
+TEST_DATABASE_URL (in the root .env) must point at a migrated
 database whose name contains "test". Every table is emptied before each test.
 """
 
@@ -16,7 +16,7 @@ from sqlalchemy.orm import sessionmaker
 from api.config import Settings
 from api.main import create_app
 from dal import UnitOfWork, UserRole
-from dal.config import normalize_url  # importing dal.config also loads the DAL's .env
+from dal.config import normalize_url  # importing dal.config also loads the root .env
 
 ALL_TABLES = "order_items, orders, products, categories, users"
 PASSWORD = "correct-horse-battery"
@@ -27,7 +27,7 @@ TEST_SETTINGS = Settings(jwt_secret="test-only-secret-" + "x" * 32, token_minute
 def engine():
     url = os.getenv("TEST_DATABASE_URL")
     if not url:
-        pytest.skip("TEST_DATABASE_URL is not set (see commercecore-dal/.env.example)")
+        pytest.skip("TEST_DATABASE_URL is not set (see the root .env.example)")
     engine = create_engine(normalize_url(url))
     if "test" not in (engine.url.database or ""):
         pytest.exit(f"Refusing to run: '{engine.url.database}' does not look like a test database.")

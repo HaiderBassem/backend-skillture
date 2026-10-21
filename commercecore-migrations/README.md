@@ -43,7 +43,7 @@ From the repository root:
 make migrate     # upgrades BOTH the dev and the test database to the latest step
 ```
 
-The database URLs come from `../commercecore-dal/.env` (the only place they are configured).
+The database URLs come from the root `.env` (the only settings file).
 By hand: `cd commercecore-migrations && DATABASE_URL=postgresql+psycopg://... ../.venv/bin/python -m alembic upgrade head`.
 
 Useful Alembic commands (same `DATABASE_URL`): `alembic current` (where am I?), `alembic history`,

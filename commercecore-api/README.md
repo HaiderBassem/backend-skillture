@@ -25,10 +25,9 @@ POST /orders  {"items": [{"product_id": 1, "quantity": 2}]}
 
 ```
 commercecore-api/
-├── .env.example           JWT_SECRET, ACCESS_TOKEN_MINUTES  (the database URL is in ../commercecore-dal/.env)
 ├── api/
 │   ├── main.py            create_app(): builds the app, plugs in services, routers, error handlers
-│   ├── config.py          settings from .env
+│   ├── config.py          JWT_SECRET, ACCESS_TOKEN_MINUTES from the root .env
 │   ├── security.py        create / read the JWT access token
 │   ├── dependencies.py    CurrentActor, AdminActor, services, paging
 │   ├── errors.py          ServiceError → HTTP status + {"code", "message", "field"}
@@ -53,7 +52,7 @@ Every command runs from the **repository root** (the root `Makefile` drives all 
 You need the databases first: see the DAL README (`make install`, `make migrate`).
 
 ```bash
-cp commercecore-api/.env.example commercecore-api/.env   # then set JWT_SECRET (how to generate one is in the file)
+cp .env.example .env                                     # then set JWT_SECRET (how to generate one is in the file)
 make run                                                 # http://127.0.0.1:8000/docs
 make seed                                                # optional: demo data, all passwords "password123"
 ```
@@ -119,7 +118,7 @@ Every error has the same body:
 ## Tests
 
 ```bash
-make test        # from the root; needs TEST_DATABASE_URL in ../commercecore-dal/.env (a migrated database named *test*)
+make test        # from the root; needs TEST_DATABASE_URL in the root .env (a migrated database named *test*)
 ```
 
 They cover the BRD scenarios A–E over HTTP, every business rule that has an HTTP face (BR-01 … BR-12),

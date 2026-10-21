@@ -1,4 +1,4 @@
-"""Settings read from the environment (and from the .env file next to this project)."""
+"""Settings read from the environment (and from the ONE .env file at the repository root)."""
 
 import os
 from dataclasses import dataclass
@@ -6,8 +6,10 @@ from pathlib import Path
 
 from dotenv import load_dotenv
 
+ENV_FILE = Path(__file__).resolve().parents[2] / ".env"  # <repo>/.env, shared by every layer
+
 # Variables already set in the real environment win over the .env file.
-load_dotenv(Path(__file__).resolve().parent.parent / ".env")
+load_dotenv(ENV_FILE)
 
 
 @dataclass(frozen=True)
@@ -27,7 +29,7 @@ def normalize_url(url: str) -> str:
 def get_settings() -> Settings:
     url = os.getenv("DATABASE_URL")
     if not url:
-        raise RuntimeError("DATABASE_URL is not set. Copy .env.example to .env and fill it in.")
+        raise RuntimeError(f"DATABASE_URL is not set. Copy .env.example to {ENV_FILE} and fill it in.")
     return Settings(
         database_url=normalize_url(url),
         db_echo=os.getenv("DB_ECHO", "false").lower() in ("1", "true", "yes"),

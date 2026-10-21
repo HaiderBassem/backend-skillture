@@ -1,7 +1,7 @@
 """Test setup.
 
 Like the DAL tests, these run against a REAL Postgres database already built by
-commercecore-migrations. TEST_DATABASE_URL (in ../commercecore-dal/.env) must
+commercecore-migrations. TEST_DATABASE_URL (in the root .env) must
 point at a migrated database whose name contains "test": every table is emptied
 before each test that uses the database.
 """
@@ -13,7 +13,7 @@ from sqlalchemy import create_engine, text
 from sqlalchemy.orm import sessionmaker
 
 from dal import UnitOfWork, UserRole
-from dal.config import normalize_url  # importing dal.config also loads the DAL's .env
+from dal.config import normalize_url  # importing dal.config also loads the root .env
 from services import AccountService, Actor, CatalogService, OrderService
 
 ALL_TABLES = "order_items, orders, products, categories, users"
@@ -23,7 +23,7 @@ ALL_TABLES = "order_items, orders, products, categories, users"
 def engine():
     url = os.getenv("TEST_DATABASE_URL")
     if not url:
-        pytest.skip("TEST_DATABASE_URL is not set (see commercecore-dal/.env.example)")
+        pytest.skip("TEST_DATABASE_URL is not set (see the root .env.example)")
     engine = create_engine(normalize_url(url))
     if "test" not in (engine.url.database or ""):
         pytest.exit(f"Refusing to run: '{engine.url.database}' does not look like a test database.")

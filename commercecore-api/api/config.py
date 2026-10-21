@@ -1,7 +1,5 @@
-"""Settings for the HTTP layer, read from the environment (and from commercecore-api/.env).
-
-The database connection is NOT configured here: the data access layer reads
-DATABASE_URL from ../commercecore-dal/.env.
+"""Settings for the HTTP layer, read from the environment (and from the ONE .env file
+at the repository root, which also holds the database settings read by the DAL).
 """
 
 import os
@@ -10,8 +8,10 @@ from pathlib import Path
 
 from dotenv import load_dotenv
 
+ENV_FILE = Path(__file__).resolve().parents[2] / ".env"  # <repo>/.env, shared by every layer
+
 # Variables already set in the real environment win over the .env file.
-load_dotenv(Path(__file__).resolve().parent.parent / ".env")
+load_dotenv(ENV_FILE)
 
 MIN_SECRET_LENGTH = 32
 
@@ -27,7 +27,7 @@ def get_settings() -> Settings:
     if len(secret) < MIN_SECRET_LENGTH:
         raise RuntimeError(
             f"JWT_SECRET must be a random string of at least {MIN_SECRET_LENGTH} characters. "
-            "Copy .env.example to .env and fill it in."
+            f"Copy .env.example to {ENV_FILE} and fill it in."
         )
     return Settings(
         jwt_secret=secret,

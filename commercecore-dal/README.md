@@ -10,12 +10,10 @@ The database access layer (repository pattern) for CommerceCore.
 
 ```
 commercecore-dal/
-├── .env                  your local settings (git-ignored)
-├── .env.example          template for .env
 ├── pytest.ini            lets the tests `import dal`
 ├── requirements.txt      runtime dependencies  (requirements-dev.txt adds pytest)
 ├── dal/
-│   ├── config.py         reads .env  ->  DATABASE_URL
+│   ├── config.py         reads the root .env  ->  DATABASE_URL
 │   ├── database.py       SQLAlchemy engine + session factory
 │   ├── entities.py       User, Category, Product, Order, OrderItem (+ enums)
 │   ├── exceptions.py     DuplicateError, RuleViolationError, CategoryInUseError
@@ -31,13 +29,13 @@ All commands run from the **repository root** (one shared `.venv` for every laye
 
 ```bash
 createdb commercecore && createdb commercecore_test
-cp commercecore-dal/.env.example commercecore-dal/.env    # then edit DATABASE_URL and TEST_DATABASE_URL
+cp .env.example .env                                      # then edit DATABASE_URL and TEST_DATABASE_URL
 make install                                              # shared .venv with every dependency
 make migrate                                              # build both databases (../commercecore-migrations)
 make check                                                # = python -m dal.check: connection + tables
 ```
 
-This `.env` is the only place the database URLs are configured: the migrations, the services and the API all read it.
+The root `.env` is the only settings file: the migrations, the DAL, the services and the API all read it.
 
 ## Using it
 
@@ -75,4 +73,4 @@ make test                                         # from the root: DAL, then ser
 cd commercecore-dal && ../.venv/bin/python -m pytest   # only this layer (30 tests)
 ```
 
-`TEST_DATABASE_URL` (in `.env`) must point at a database whose name contains `test`: every table is emptied before each test.
+`TEST_DATABASE_URL` (in the root `.env`) must point at a database whose name contains `test`: every table is emptied before each test.

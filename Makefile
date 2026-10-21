@@ -9,15 +9,13 @@
 #   make seed                     fill an EMPTY dev database with demo data
 #   make admin EMAIL=you@x.com    make a registered user an administrator
 #
-# Settings live in two files only:
-#   commercecore-dal/.env   DATABASE_URL, TEST_DATABASE_URL   (copy .env.example)
-#   commercecore-api/.env   JWT_SECRET                         (copy .env.example)
+# Settings live in ONE file: .env here at the root (cp .env.example .env), read by every layer.
 
 PY := $(CURDIR)/.venv/bin/python
 export PYTHONPATH := $(CURDIR)/commercecore-api:$(CURDIR)/commercecore-services:$(CURDIR)/commercecore-dal
 
-# Reads one URL from commercecore-dal/.env, so the migrations use the same database as the app.
-db_url = $(shell $(PY) -c "from dotenv import dotenv_values; print(dotenv_values('commercecore-dal/.env')['$(1)'])")
+# Reads one URL from .env, so the migrations use the same database as the app.
+db_url = $(shell $(PY) -c "from dotenv import dotenv_values; print(dotenv_values('.env')['$(1)'])")
 
 .PHONY: install migrate check test lint run seed admin
 

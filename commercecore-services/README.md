@@ -66,7 +66,7 @@ The API layer turns errors into responses:
 
 ## Tests
 
-Same database setup as the DAL (`TEST_DATABASE_URL` in `../commercecore-dal/.env`, migrated, name contains `test`):
+Same database setup as the DAL (`TEST_DATABASE_URL` in the root `.env`, migrated, name contains `test`):
 
 ```bash
 cd commercecore-services

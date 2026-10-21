@@ -36,8 +36,7 @@ Everything runs from this folder through the `Makefile`, with **one shared `.ven
 
 ```bash
 createdb commercecore && createdb commercecore_test
-cp commercecore-dal/.env.example commercecore-dal/.env    # database URLs
-cp commercecore-api/.env.example commercecore-api/.env    # JWT_SECRET
+cp .env.example .env     # ONE settings file: database URLs + JWT_SECRET
 make install     # .venv (Python 3.12) with every dependency
 make migrate     # build the dev and the test database
 make test        # every layer: DAL -> services -> API
@@ -52,8 +51,9 @@ make lint        # ruff, same rules for every project (pyproject.toml)
 | `Makefile` | every command for every layer |
 | `requirements-dev.txt` | installs all four projects' dependencies into the shared `.venv` |
 | `pyproject.toml` | shared tool settings (ruff) |
+| `.env.example` | the settings template: copy it to `.env` (databases, token secret) |
 
-Settings live in exactly two files: `commercecore-dal/.env` (databases) and `commercecore-api/.env` (token secret).
+All settings live in **one file**, `.env` at the root (git-ignored); `.env.example` is the template to copy.
 
 ## Where each requirement lives
 

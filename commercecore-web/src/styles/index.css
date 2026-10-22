@@ -1,0 +1,196 @@
+@import "tailwindcss";
+@import "@fontsource-variable/fraunces";
+@import "@fontsource-variable/manrope";
+
+/*
+  Design tokens. Components only ever use the semantic names (bg-surface, text-muted, ...),
+  never raw hex, so light and dark stay in step. Every text/background pair below meets
+  WCAG AA (4.5:1) in both themes.
+*/
+:root {
+  --bg: #f6f3ee;
+  --surface: #ffffff;
+  --surface-2: #efebe4;
+  --ink: #1c1b18;
+  --muted: #6a655b;
+  --line: #e0dbd0;
+  --accent: #0d6b5e;
+  --accent-ink: #ffffff;
+  --accent-soft: #dcefe9;
+  --accent-soft-ink: #0a4f45;
+  --warn-soft: #fbeccb;
+  --warn-ink: #6e4300;
+  --danger: #b42318;
+  --danger-soft: #fde8e6;
+  --danger-ink: #8a1a10;
+  --scrim: rgb(20 19 17 / 0.5);
+  --shadow: 0 1px 2px rgb(28 27 24 / 0.06), 0 8px 24px -12px rgb(28 27 24 / 0.18);
+  color-scheme: light;
+}
+
+:root[data-theme="dark"] {
+  --bg: #141311;
+  --surface: #1e1d1a;
+  --surface-2: #28261f;
+  --ink: #f1ede6;
+  --muted: #a8a297;
+  --line: #36332c;
+  --accent: #5cc9b2;
+  --accent-ink: #0b1f1b;
+  --accent-soft: #15332d;
+  --accent-soft-ink: #9fe3d3;
+  --warn-soft: #3a2d10;
+  --warn-ink: #f3cf85;
+  --danger: #f08a80;
+  --danger-soft: #3d1c19;
+  --danger-ink: #f6b3ac;
+  --scrim: rgb(0 0 0 / 0.6);
+  --shadow: 0 1px 2px rgb(0 0 0 / 0.4), 0 8px 24px -12px rgb(0 0 0 / 0.6);
+  color-scheme: dark;
+}
+
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --bg: #141311;
+    --surface: #1e1d1a;
+    --surface-2: #28261f;
+    --ink: #f1ede6;
+    --muted: #a8a297;
+    --line: #36332c;
+    --accent: #5cc9b2;
+    --accent-ink: #0b1f1b;
+    --accent-soft: #15332d;
+    --accent-soft-ink: #9fe3d3;
+    --warn-soft: #3a2d10;
+    --warn-ink: #f3cf85;
+    --danger: #f08a80;
+    --danger-soft: #3d1c19;
+    --danger-ink: #f6b3ac;
+    --scrim: rgb(0 0 0 / 0.6);
+    --shadow: 0 1px 2px rgb(0 0 0 / 0.4), 0 8px 24px -12px rgb(0 0 0 / 0.6);
+    color-scheme: dark;
+  }
+}
+
+@theme inline {
+  --color-bg: var(--bg);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-ink: var(--ink);
+  --color-muted: var(--muted);
+  --color-line: var(--line);
+  --color-accent: var(--accent);
+  --color-accent-ink: var(--accent-ink);
+  --color-accent-soft: var(--accent-soft);
+  --color-accent-soft-ink: var(--accent-soft-ink);
+  --color-warn-soft: var(--warn-soft);
+  --color-warn-ink: var(--warn-ink);
+  --color-danger: var(--danger);
+  --color-danger-soft: var(--danger-soft);
+  --color-danger-ink: var(--danger-ink);
+  --font-sans: "Manrope Variable", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Fraunces Variable", ui-serif, Georgia, serif;
+  --shadow-card: var(--shadow);
+  --radius-card: 14px;
+}
+
+@layer base {
+  html {
+    -webkit-text-size-adjust: 100%;
+  }
+  body {
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--font-sans);
+    font-size: 16px;
+    line-height: 1.55;
+    -webkit-font-smoothing: antialiased;
+    min-height: 100dvh;
+  }
+  h1,
+  h2,
+  h3 {
+    font-family: var(--font-display);
+    font-weight: 600;
+    letter-spacing: -0.01em;
+    line-height: 1.15;
+  }
+  /* Visible keyboard focus everywhere. */
+  :focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+    border-radius: 6px;
+  }
+  button,
+  [role="button"],
+  a,
+  select,
+  summary {
+    cursor: pointer;
+    touch-action: manipulation;
+  }
+  button:disabled {
+    cursor: not-allowed;
+  }
+  dialog::backdrop {
+    background: var(--scrim);
+  }
+  ::selection {
+    background: var(--accent-soft);
+    color: var(--accent-soft-ink);
+  }
+}
+
+@layer utilities {
+  .tnum {
+    font-variant-numeric: tabular-nums;
+  }
+  .enter {
+    animation: enter 220ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
+  }
+  .stagger > * {
+    animation: enter 260ms cubic-bezier(0.2, 0.7, 0.2, 1) both;
+    animation-delay: calc(min(var(--i, 0), 12) * 35ms);
+  }
+  .skeleton {
+    background: linear-gradient(90deg, var(--surface-2) 25%, var(--line) 50%, var(--surface-2) 75%);
+    background-size: 200% 100%;
+    animation: shimmer 1.4s linear infinite;
+  }
+}
+
+@keyframes enter {
+  from {
+    opacity: 0;
+    transform: translateY(6px);
+  }
+  to {
+    opacity: 1;
+    transform: none;
+  }
+}
+@keyframes shimmer {
+  to {
+    background-position: -200% 0;
+  }
+}
+@keyframes drawer-in {
+  from {
+    transform: translateX(24px);
+    opacity: 0;
+  }
+  to {
+    transform: none;
+    opacity: 1;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

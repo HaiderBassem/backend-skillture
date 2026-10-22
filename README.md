@@ -29,6 +29,10 @@ Each layer only talks to the one directly below it, and each has its own README 
 | `commercecore-dal` | 30 | `dal/unit_of_work.py`, `dal/repositories/` |
 | `commercecore-services` | 141 | `services/order_service.py` |
 | `commercecore-api` | 80 | `api/main.py`, `api/schemas/`, `api/routers/` |
+| `commercecore-web` | 26 | `src/app/router.tsx`, `src/features/`, its `README.md` |
+
+`commercecore-web` is the browser front end (React + TypeScript): a storefront for customers and an admin
+console. It sits on top of the API and uses nothing else: `make run` then `make web`.
 
 ## Getting started
 

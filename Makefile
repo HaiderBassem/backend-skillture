@@ -8,6 +8,9 @@
 #   make run                      start the API: http://127.0.0.1:8000/docs
 #   make seed                     fill an EMPTY dev database with demo data
 #   make admin EMAIL=you@x.com    make a registered user an administrator
+#   make web-install              install the web app's packages (needs Node 20+)
+#   make web                      start the web app: http://127.0.0.1:5173  (run `make run` too)
+#   make web-test                 type-check, test and build the web app
 #
 # Settings live in ONE file: .env here at the root (cp .env.example .env), read by every layer.
 
@@ -17,7 +20,7 @@ export PYTHONPATH := $(CURDIR)/commercecore-api:$(CURDIR)/commercecore-services:
 # Reads one URL from .env, so the migrations use the same database as the app.
 db_url = $(shell $(PY) -c "from dotenv import dotenv_values; print(dotenv_values('.env')['$(1)'])")
 
-.PHONY: install migrate check test lint run seed admin
+.PHONY: install migrate check test lint run seed admin web-install web web-test
 
 install:
 	uv venv --python 3.12 .venv
@@ -48,3 +51,12 @@ seed:
 
 admin:
 	$(PY) -m api.manage make-admin $(EMAIL)
+
+web-install:
+	cd commercecore-web && npm install
+
+web:
+	cd commercecore-web && npm run dev -- --host 127.0.0.1
+
+web-test:
+	cd commercecore-web && npm run typecheck && npm test && npm run build
